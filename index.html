@@ -3,531 +3,497 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Text Reader iPhone Lite Safe v2</title>
+  <title>Study Mode Pro MP3</title>
   <style>
     :root{
       --bg:#f5f7fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
       --primary:#2563eb; --primary2:#1d4ed8; --danger:#dc2626; --ok:#059669;
-      --shadow:0 10px 30px rgba(0,0,0,.08); --radius:18px;
+      --shadow:0 10px 30px rgba(0,0,0,.08); --radius:18px; --reader-size:17px;
+      --highlight:#fff7cc; --active:#eff6ff;
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
-    .wrap{max-width:1040px;margin:0 auto;padding:16px 14px 100px}
+    .wrap{max-width:1120px;margin:0 auto;padding:16px 14px calc(140px + env(safe-area-inset-bottom))}
     .title{font-size:28px;font-weight:800;margin:8px 0 6px}
     .sub{color:var(--muted);font-size:14px;margin-bottom:14px}
     .card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px;margin-bottom:14px}
-    textarea{width:100%;min-height:220px;border:1px solid var(--line);border-radius:16px;padding:14px;font-size:17px;line-height:1.6;resize:vertical;outline:none}
+    textarea{width:100%;min-height:180px;border:1px solid var(--line);border-radius:16px;padding:14px;font-size:var(--reader-size);line-height:1.6;resize:vertical;outline:none}
     textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-    .toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-    @media (min-width:700px){.toolbar{grid-template-columns:repeat(5,minmax(0,1fr));}}
-    button,select,input[type="range"]{width:100%}
+    button,select,input[type="range"],input[type="number"],input[type="file"]{width:100%}
     button{border:none;border-radius:14px;padding:12px 14px;font-size:16px;font-weight:700;cursor:pointer;background:#eef2ff;color:#1e3a8a}
     button.primary{background:var(--primary);color:#fff}
     button.primary:active{background:var(--primary2)}
     button.stop{background:#fee2e2;color:#991b1b}
     button.ok{background:#d1fae5;color:#065f46}
     .row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
-    @media (min-width:840px){.row{grid-template-columns:1fr 1fr}}
+    @media (min-width:900px){.row{grid-template-columns:1fr 1fr}}
     .controls{display:grid;grid-template-columns:1fr;gap:12px}
     .control{border:1px solid var(--line);border-radius:14px;padding:12px}
     .control label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-bottom:8px}
-    select{border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:16px;background:#fff}
-    .dual{display:grid;grid-template-columns:1fr;gap:12px}
-    @media (min-width:900px){.dual{grid-template-columns:1fr 1fr}}
+    select,input[type="number"],input[type="file"]{border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:16px;background:#fff}
+    .triple{display:grid;grid-template-columns:1fr;gap:12px}
+    @media (min-width:950px){.triple{grid-template-columns:1fr 1fr 1fr}}
+    .double{display:grid;grid-template-columns:1fr;gap:12px}
+    @media (min-width:750px){.double{grid-template-columns:1fr 1fr}}
     .segments{display:grid;gap:10px;margin-top:12px}
-    .seg{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px 13px;font-size:17px;cursor:pointer;transition:.15s ease}
+    .seg{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px 13px;font-size:var(--reader-size);cursor:pointer;transition:.15s ease;scroll-margin-top:90px}
     .seg:hover{transform:translateY(-1px)}
-    .seg.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12);background:#eff6ff}
+    .seg.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12);background:var(--active)}
     .meta{font-size:12px;color:var(--muted);margin-bottom:4px}
     .hint{font-size:13px;color:var(--muted);margin-top:8px}
     .status{margin-top:8px;font-size:14px;color:var(--muted)}
     .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;background:#f3f4f6;color:#374151;margin-right:6px}
     .sticky{position:sticky;top:0;z-index:10;padding-top:env(safe-area-inset-top);background:linear-gradient(to bottom, rgba(245,247,251,1), rgba(245,247,251,.85), rgba(245,247,251,0));backdrop-filter:saturate(180%) blur(12px)}
     .pill{display:inline-block;background:#eff6ff;color:#1d4ed8;padding:3px 8px;border-radius:999px;font-size:12px}
+    .reader-line{padding:4px 6px;border-radius:8px;display:block;font-size:var(--reader-size)}
+    .reader-line.current{background:var(--highlight)}
+    .segment-text{margin-top:6px;line-height:1.7}
+    .floating-bar-wrap{position:fixed;left:0;right:0;bottom:0;z-index:9999;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(to top, rgba(245,247,251,0.98), rgba(245,247,251,0.92), rgba(245,247,251,0));backdrop-filter:saturate(180%) blur(16px)}
+    .floating-bar{max-width:1120px;margin:0 auto;background:#ffffffee;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px;padding:10px}
+    .floating-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    @media (min-width:700px){.floating-grid{grid-template-columns:repeat(8,1fr);}}
+    .floating-grid button{padding:11px 10px;font-size:15px}
+    .player-box{display:grid;gap:10px}
+    audio{width:100%}
+    .time-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .small{font-size:12px;color:var(--muted)}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="sticky">
-      <div class="title">Đọc lớn văn bản — iPhone Safe Lite v2</div>
-      <div class="sub">Bản rút gọn để ổn định hơn trên iPhone. Chỉ giữ 3 combo: Vi+Ko, Ko x2, Ko+En.</div>
+      <div class="title">Study Mode Pro — MP3</div>
+      <div class="sub">Nạp mp3 của bạn vào rồi học bằng repeat, A/B loop, shadow, transcript sync, tua theo câu/đoạn ngay trên iPhone.</div>
     </div>
 
     <div class="card">
-      <textarea id="inputText" placeholder="Dán văn bản vào đây..."></textarea>
-
-      <div class="toolbar">
-        <button class="primary" id="splitBtn">Tách đoạn</button>
-        <button id="readAllBtn">Đọc từ đầu</button>
-        <button id="repeatBtn">Đọc lại đoạn hiện tại</button>
-        <button class="stop" id="stopBtn">Dừng</button>
-        <button class="ok" id="clearBtn">Xóa</button>
+      <div class="double">
+        <div class="control">
+          <label for="audioFile"><span>File MP3</span><span class="pill">Upload local</span></label>
+          <input id="audioFile" type="file" accept="audio/*" />
+          <div class="hint">Bạn có thể dùng mp3 từ bất cứ nguồn nào, chỉ cần chọn file từ iPhone hoặc Files.</div>
+        </div>
+        <div class="control">
+          <label for="transcript"><span>Transcript / nội dung</span><span class="pill">Optional</span></label>
+          <div class="small">Dán transcript để chia câu, highlight, và dùng nút đọc theo câu/đoạn.</div>
+        </div>
       </div>
+
+      <textarea id="transcript" placeholder="Dán transcript hoặc văn bản ở đây..."></textarea>
 
       <div class="row">
         <div class="controls">
-          <div class="control">
-            <label for="comboSelect"><span>Combo đọc</span><span class="pill">Rút gọn cho iPhone</span></label>
-            <select id="comboSelect">
-              <option value="vi-ko">Vi + Ko</option>
-              <option value="ko2">Ko x2</option>
-              <option value="ko-en">Ko + En</option>
-            </select>
-            <div class="hint">Nếu đoạn không có ngôn ngữ thuộc combo đã chọn, app sẽ tự bỏ qua phần đó.</div>
+          <div class="control player-box">
+            <label><span>Trình phát MP3</span><strong id="audioInfo">Chưa có file</strong></label>
+            <audio id="audio" controls preload="metadata"></audio>
+            <div class="small" id="audioMeta">Nạp file mp3 để bắt đầu.</div>
           </div>
 
           <div class="control">
-            <label for="segmentMode"><span>Kiểu tách</span></label>
-            <select id="segmentMode">
-              <option value="paragraph">Theo đoạn</option>
-              <option value="sentence">Theo câu</option>
+            <label for="studyMode"><span>Study mode</span><span class="pill">Pro</span></label>
+            <select id="studyMode">
+              <option value="normal">Nghe bình thường</option>
+              <option value="line_repeat_2">Lặp câu x2</option>
+              <option value="line_repeat_3">Lặp câu x3</option>
+              <option value="shadow_pause">Shadow: câu → pause → câu</option>
+              <option value="ab_loop">A/B loop</option>
             </select>
           </div>
 
           <div class="control">
-            <label for="safeMode"><span>Safe mode</span><span class="pill">Nên bật</span></label>
-            <select id="safeMode">
-              <option value="on">Bật</option>
-              <option value="off">Tắt</option>
-            </select>
+            <label for="fontSize"><span>Cỡ chữ</span><strong id="fontSizeValue">17 px</strong></label>
+            <input id="fontSize" type="range" min="14" max="30" step="1" value="17" />
+          </div>
+
+          <div class="control">
+            <label for="playbackRate"><span>Tốc độ MP3</span><strong id="playbackRateValue">1.0x</strong></label>
+            <input id="playbackRate" type="range" min="0.5" max="1.5" step="0.05" value="1" />
           </div>
         </div>
 
         <div class="controls">
           <div class="control">
-            <label><span>Tùy chọn đọc</span></label>
-            <button id="nextBtn">Đọc đoạn tiếp theo</button>
-            <div class="hint">Chạm vào đoạn nào thì đọc đoạn đó.</div>
+            <label for="shadowPause"><span>Pause cho shadow</span><strong id="shadowPauseValue">800 ms</strong></label>
+            <input id="shadowPause" type="range" min="200" max="3000" step="100" value="800" />
           </div>
 
           <div class="control">
-            <label for="pauseMs"><span>Nghỉ giữa 2 lượt đọc</span><strong id="pauseMsValue">260 ms</strong></label>
-            <input id="pauseMs" type="range" min="120" max="500" step="10" value="260" />
+            <label for="loopStart"><span>A/B loop start (giây)</span></label>
+            <input id="loopStart" type="number" min="0" step="0.1" value="0" />
+          </div>
+
+          <div class="control">
+            <label for="loopEnd"><span>A/B loop end (giây)</span></label>
+            <input id="loopEnd" type="number" min="0" step="0.1" value="5" />
+          </div>
+
+          <div class="control">
+            <label for="autoScrollToggle"><span>Auto scroll transcript</span></label>
+            <select id="autoScrollToggle">
+              <option value="on">Bật</option>
+              <option value="off">Tắt</option>
+            </select>
           </div>
 
           <div class="status" id="status">Sẵn sàng.</div>
         </div>
       </div>
-
-      <div class="dual" style="margin-top:12px;">
-        <div class="control">
-          <label for="voiceA"><span>Voice A</span><strong id="rateAValue">1.0x</strong></label>
-          <select id="voiceA"></select>
-          <div style="margin-top:10px;"><input id="rateA" type="range" min="0.5" max="2" step="0.05" value="1" /></div>
-        </div>
-        <div class="control">
-          <label for="voiceB"><span>Voice B</span><strong id="rateBValue">1.0x</strong></label>
-          <select id="voiceB"></select>
-          <div style="margin-top:10px;"><input id="rateB" type="range" min="0.5" max="2" step="0.05" value="1" /></div>
-        </div>
-      </div>
-
-      <div class="hint">Quy ước: Vi+Ko dùng A=Việt, B=Hàn. Ko x2 dùng voice Hàn và đọc mỗi đoạn Hàn 2 lần. Ko+En dùng A=Hàn, B=Anh.</div>
     </div>
 
     <div class="card">
-      <div style="font-weight:800; font-size:18px; margin-bottom:8px;">Danh sách đoạn</div>
+      <div style="font-weight:800; font-size:18px; margin-bottom:8px;">Transcript / câu</div>
       <div class="segments" id="segments"></div>
+      <div class="hint">Chạm vào một câu để nhảy audio tới mốc của câu đó. Vì đây là mp3 local, mốc thời gian ban đầu sẽ chia đều theo tổng thời lượng; bạn có thể dùng A/B loop để nghe kỹ từng đoạn.</div>
+    </div>
+  </div>
+
+  <div class="floating-bar-wrap">
+    <div class="floating-bar">
+      <div class="floating-grid">
+        <button class="primary" id="splitBtn">Tách câu</button>
+        <button id="playBtn">Phát</button>
+        <button id="pauseBtn">Tạm dừng</button>
+        <button id="readFromHereBtn">Nghe từ đây</button>
+        <button id="prevLineBtn">Lùi 1 câu</button>
+        <button id="nextLineBtn">Tới 1 câu</button>
+        <button class="stop" id="stopBtn">Dừng</button>
+        <button class="ok" id="clearBtn">Xóa</button>
+      </div>
     </div>
   </div>
 
   <script>
-
     const $ = id => document.getElementById(id);
-    const inputText = $('inputText');
+    const audioFile = $('audioFile');
+    const transcript = $('transcript');
+    const audio = $('audio');
+    const audioInfo = $('audioInfo');
+    const audioMeta = $('audioMeta');
+    const studyMode = $('studyMode');
+    const fontSize = $('fontSize');
+    const fontSizeValue = $('fontSizeValue');
+    const playbackRate = $('playbackRate');
+    const playbackRateValue = $('playbackRateValue');
+    const shadowPause = $('shadowPause');
+    const shadowPauseValue = $('shadowPauseValue');
+    const loopStart = $('loopStart');
+    const loopEnd = $('loopEnd');
+    const autoScrollToggle = $('autoScrollToggle');
     const splitBtn = $('splitBtn');
-    const readAllBtn = $('readAllBtn');
-    const repeatBtn = $('repeatBtn');
+    const playBtn = $('playBtn');
+    const pauseBtn = $('pauseBtn');
+    const readFromHereBtn = $('readFromHereBtn');
+    const prevLineBtn = $('prevLineBtn');
+    const nextLineBtn = $('nextLineBtn');
     const stopBtn = $('stopBtn');
     const clearBtn = $('clearBtn');
-    const nextBtn = $('nextBtn');
-    const comboSelect = $('comboSelect');
-    const segmentMode = $('segmentMode');
-    const safeMode = $('safeMode');
-    const pauseMs = $('pauseMs');
-    const pauseMsValue = $('pauseMsValue');
-    const statusEl = $('status');
     const segmentsEl = $('segments');
-    const voiceA = $('voiceA');
-    const voiceB = $('voiceB');
-    const rateA = $('rateA');
-    const rateB = $('rateB');
-    const rateAValue = $('rateAValue');
-    const rateBValue = $('rateBValue');
+    const statusEl = $('status');
 
-    let voices = [];
     let segments = [];
-    let currentIndex = -1;
-    let isCancelled = false;
-
-    inputText.value = `Xin chào. Đây là bản iPhone rút gọn.
-
-안녕하세요. 한국어 테스트입니다.
-
-Hello. This is an English test.
-
-Tiếng Việt rồi tới 한국어 rồi tới English trong cùng một đoạn.`;
+    let currentLineIndex = -1;
+    let lineTimings = [];
+    let shadowTimeout = null;
+    let lastKnownTime = 0;
 
     function setStatus(msg){ statusEl.textContent = msg; }
-    function wait(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
-
-    function updateLabels() {
-      rateAValue.textContent = Number(rateA.value).toFixed(2).replace(/\.00$/, '') + 'x';
-      rateBValue.textContent = Number(rateB.value).toFixed(2).replace(/\.00$/, '') + 'x';
-      pauseMsValue.textContent = pauseMs.value + ' ms';
+    function updateLabels(){
+      fontSizeValue.textContent = fontSize.value + ' px';
+      playbackRateValue.textContent = Number(playbackRate.value).toFixed(2).replace(/\.00$/,'') + 'x';
+      shadowPauseValue.textContent = shadowPause.value + ' ms';
+      document.documentElement.style.setProperty('--reader-size', fontSize.value + 'px');
+      audio.playbackRate = parseFloat(playbackRate.value);
     }
 
-    function saveSettings() {
-      localStorage.setItem('reader_lite_v2_text', inputText.value);
-      localStorage.setItem('reader_lite_v2_combo', comboSelect.value);
-      localStorage.setItem('reader_lite_v2_mode', segmentMode.value);
-      localStorage.setItem('reader_lite_v2_safe', safeMode.value);
-      localStorage.setItem('reader_lite_v2_pause', pauseMs.value);
-      localStorage.setItem('reader_lite_v2_voice_a', voiceA.value || '');
-      localStorage.setItem('reader_lite_v2_voice_b', voiceB.value || '');
-      localStorage.setItem('reader_lite_v2_rate_a', rateA.value);
-      localStorage.setItem('reader_lite_v2_rate_b', rateB.value);
+    function saveSettings(){
+      localStorage.setItem('study_mp3_transcript', transcript.value);
+      localStorage.setItem('study_mp3_mode', studyMode.value);
+      localStorage.setItem('study_mp3_font', fontSize.value);
+      localStorage.setItem('study_mp3_rate', playbackRate.value);
+      localStorage.setItem('study_mp3_shadow_pause', shadowPause.value);
+      localStorage.setItem('study_mp3_loop_start', loopStart.value);
+      localStorage.setItem('study_mp3_loop_end', loopEnd.value);
+      localStorage.setItem('study_mp3_autoscroll', autoScrollToggle.value);
     }
 
-    function loadSettings() {
-      inputText.value = localStorage.getItem('reader_lite_v2_text') || inputText.value;
-      comboSelect.value = localStorage.getItem('reader_lite_v2_combo') || 'vi-ko';
-      segmentMode.value = localStorage.getItem('reader_lite_v2_mode') || 'paragraph';
-      safeMode.value = localStorage.getItem('reader_lite_v2_safe') || 'on';
-      pauseMs.value = localStorage.getItem('reader_lite_v2_pause') || '260';
-      rateA.value = localStorage.getItem('reader_lite_v2_rate_a') || '1';
-      rateB.value = localStorage.getItem('reader_lite_v2_rate_b') || '1';
+    function loadSettings(){
+      transcript.value = localStorage.getItem('study_mp3_transcript') || '';
+      studyMode.value = localStorage.getItem('study_mp3_mode') || 'normal';
+      fontSize.value = localStorage.getItem('study_mp3_font') || '17';
+      playbackRate.value = localStorage.getItem('study_mp3_rate') || '1';
+      shadowPause.value = localStorage.getItem('study_mp3_shadow_pause') || '800';
+      loopStart.value = localStorage.getItem('study_mp3_loop_start') || '0';
+      loopEnd.value = localStorage.getItem('study_mp3_loop_end') || '5';
+      autoScrollToggle.value = localStorage.getItem('study_mp3_autoscroll') || 'on';
       updateLabels();
     }
 
-    function splitText(text, mode) {
-      const clean = text.replace(/\r/g, '').trim();
-      if (!clean) return [];
-      if (mode === 'sentence') {
-        return clean.replace(/\n+/g, ' ')
-          .match(/[^.!?。！？\n]+[.!?。！？]?/g)
-          ?.map(s => s.trim())
-          .filter(Boolean) || [];
-      }
-      return clean.split(/\n{2,}/).map(s => s.trim()).filter(Boolean);
+    function sentenceSplit(text){
+      return text.split(/(?<=[.!?。！？])\s+|\n+/).map(s => s.trim()).filter(Boolean);
     }
 
-    function detectScriptType(ch) {
-      const code = ch.codePointAt(0);
-      if ((code >= 0xAC00 && code <= 0xD7AF) || (code >= 0x1100 && code <= 0x11FF) || (code >= 0x3130 && code <= 0x318F)) return 'ko';
-      if ((code >= 0x0041 && code <= 0x007A) || (code >= 0x00C0 && code <= 0x024F) || (code >= 0x1E00 && code <= 0x1EFF)) return 'latin';
-      return 'other';
+    function splitTranscript(){
+      segments = sentenceSplit(transcript.value);
+      currentLineIndex = segments.length ? 0 : -1;
+      recomputeLineTimings();
+      renderSegments();
+      setStatus(segments.length ? `Đã tách ${segments.length} câu.` : 'Không có transcript để tách.');
     }
 
-    function detectLang(text) {
-      let ko = 0, latin = 0, viMarks = 0;
-      const viChars = "ăâđêôơưáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ";
-      for (const ch of text) {
-        const t = detectScriptType(ch);
-        if (t === 'ko') ko++;
-        else if (t === 'latin') latin++;
-        if (viChars.includes(ch.toLowerCase())) viMarks++;
-      }
-      if (ko > latin && ko > 0) return 'ko';
-      if (latin > 0) {
-        if (viMarks > 0) return 'vi';
-        const lower = text.toLowerCase();
-        if (/\b(và|của|là|một|những|không|được|cho|tôi|bạn|xin chào)\b/.test(lower)) return 'vi';
-        return 'en';
-      }
-      return 'vi';
-    }
-
-    function chunkText(text) {
-      return text
-        .split(/(?<=[.!?。！？])\s+|\n+/)
-        .map(s => s.trim())
-        .filter(Boolean)
-        .map(part => ({ text: part, lang: detectLang(part) }));
-    }
-
-    function getVoiceList(pattern) {
-      return voices.filter(v => pattern.test((v.lang || '') + ' ' + (v.name || '')));
-    }
-
-    function fillVoiceSelect(selectEl, list, fallback) {
-      selectEl.innerHTML = '';
-      const finalList = list.length ? list : fallback;
-      finalList.forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = v.name;
-        opt.textContent = `${v.name} (${v.lang})`;
-        selectEl.appendChild(opt);
-      });
-    }
-
-    function getVoiceByName(name) {
-      return voices.find(v => v.name === name) || null;
-    }
-
-    function setupVoices() {
-      voices = speechSynthesis.getVoices().slice().sort((a,b) => a.name.localeCompare(b.name));
-      const viList = getVoiceList(/\bvi\b|vietnam/i);
-      const koList = getVoiceList(/\bko\b|korean|hangul/i);
-      const enList = getVoiceList(/\ben\b|english/i);
-
-      if (comboSelect.value === 'vi-ko') {
-        fillVoiceSelect(voiceA, viList, voices);
-        fillVoiceSelect(voiceB, koList, voices);
-      } else if (comboSelect.value === 'ko2') {
-        fillVoiceSelect(voiceA, koList, voices);
-        fillVoiceSelect(voiceB, koList, voices);
-      } else {
-        fillVoiceSelect(voiceA, koList, voices);
-        fillVoiceSelect(voiceB, enList, voices);
-      }
-
-      const savedA = localStorage.getItem('reader_lite_v2_voice_a');
-      const savedB = localStorage.getItem('reader_lite_v2_voice_b');
-      if (savedA && getVoiceByName(savedA)) voiceA.value = savedA;
-      if (savedB && getVoiceByName(savedB)) voiceB.value = savedB;
-    }
-
-    function comboConfig() {
-      if (comboSelect.value === 'vi-ko') {
-        return {
-          allow: new Set(['vi', 'ko']),
-          repeatLang: null,
-          map: {
-            vi: {voice: voiceA.value, rate: parseFloat(rateA.value)},
-            ko: {voice: voiceB.value, rate: parseFloat(rateB.value)}
-          }
-        };
-      }
-      if (comboSelect.value === 'ko2') {
-        return {
-          allow: new Set(['ko']),
-          repeatLang: 'ko',
-          map: {
-            ko: {voice: voiceA.value || voiceB.value, rate: parseFloat(rateA.value)}
-          }
-        };
-      }
-      return {
-        allow: new Set(['ko', 'en']),
-        repeatLang: null,
-        map: {
-          ko: {voice: voiceA.value, rate: parseFloat(rateA.value)},
-          en: {voice: voiceB.value, rate: parseFloat(rateB.value)}
-        }
-      };
-    }
-
-    function langLabel(lang) {
-      return lang === 'ko' ? 'Korean' : (lang === 'en' ? 'English' : 'Vietnamese');
-    }
-
-    function filterChunksByCombo(chunks) {
-      const cfg = comboConfig();
-      return chunks.filter(c => cfg.allow.has(c.lang));
-    }
-
-    function expandChunksForCombo(chunks) {
-      const cfg = comboConfig();
-      const filtered = filterChunksByCombo(chunks);
-      if (cfg.repeatLang !== 'ko') return filtered;
-      const expanded = [];
-      for (const item of filtered) {
-        expanded.push(item);
-        expanded.push({...item});
-      }
-      return expanded;
-    }
-
-    function renderSegments() {
-      segmentsEl.innerHTML = '';
-      if (!segments.length) {
-        segmentsEl.innerHTML = '<div class="hint">Chưa có đoạn nào. Hãy dán văn bản rồi bấm “Tách đoạn”.</div>';
+    function recomputeLineTimings(){
+      if (!segments.length || !audio.duration || !isFinite(audio.duration)) {
+        lineTimings = segments.map((_,i)=>({start:i, end:i+1}));
         return;
       }
-      segments.forEach((text, index) => {
-        const previewChunks = filterChunksByCombo(chunkText(text));
-        const preview = previewChunks.slice(0, 6).map(x => `<span class="tag">${langLabel(x.lang)}</span>`).join('');
+      const chunk = audio.duration / Math.max(segments.length, 1);
+      lineTimings = segments.map((_, i) => ({
+        start: +(i * chunk).toFixed(2),
+        end: +Math.min(audio.duration, (i + 1) * chunk).toFixed(2)
+      }));
+    }
+
+    function renderSegments(){
+      segmentsEl.innerHTML = '';
+      if (!segments.length) {
+        segmentsEl.innerHTML = '<div class="hint">Chưa có transcript. Dán nội dung rồi bấm “Tách câu”.</div>';
+        return;
+      }
+      segments.forEach((line, index) => {
+        const item = lineTimings[index] || {start:0,end:0};
         const div = document.createElement('div');
-        div.className = 'seg' + (index === currentIndex ? ' active' : '');
-        div.innerHTML = `<div class="meta">Đoạn ${index + 1}</div>${preview || '<span class="tag">No matching language</span>'}<div style="margin-top:6px;">${escapeHtml(text)}</div>`;
-        div.addEventListener('click', () => speakSegment(index));
+        div.className = 'seg' + (index === currentLineIndex ? ' active' : '');
+        div.dataset.index = index;
+        div.innerHTML = `<div class="meta">Câu ${index + 1} · ${item.start}s → ${item.end}s</div><div class="segment-text"><span class="reader-line${index===currentLineIndex?' current':''}">${escapeHtml(line)}</span></div>`;
+        div.addEventListener('click', () => {
+          currentLineIndex = index;
+          jumpToLine(index, false);
+          renderSegments();
+          scrollCurrentIntoView();
+        });
         segmentsEl.appendChild(div);
       });
     }
 
-    function escapeHtml(str) {
-      return str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    function escapeHtml(str){
+      return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
     }
 
-    function buildUtterance(text, lang) {
-      const cfg = comboConfig();
-      const conf = cfg.map[lang];
-      if (!conf) return null;
-      const voice = getVoiceByName(conf.voice) || voices[0] || null;
-      const utter = new SpeechSynthesisUtterance(text);
-      if (voice) utter.voice = voice;
-      utter.lang = voice?.lang || (lang === 'ko' ? 'ko-KR' : (lang === 'en' ? 'en-US' : 'vi-VN'));
-      utter.rate = conf.rate || 1;
-      utter.pitch = 1;
-      return utter;
+    function scrollCurrentIntoView(){
+      if (autoScrollToggle.value !== 'on') return;
+      const seg = document.querySelector(`.seg[data-index="${currentLineIndex}"]`);
+      if (!seg) return;
+      const rect = seg.getBoundingClientRect();
+      const targetTop = window.scrollY + rect.top - (window.innerHeight * 0.28);
+      window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
     }
 
-    function stopSpeaking() {
-      isCancelled = true;
-      speechSynthesis.cancel();
-      setStatus('Đã dừng.');
+    function clearShadowTimeout(){
+      if (shadowTimeout) {
+        clearTimeout(shadowTimeout);
+        shadowTimeout = null;
+      }
+    }
+
+    function jumpToLine(index, autoplay=true){
+      if (index < 0 || index >= segments.length || !lineTimings[index]) return;
+      currentLineIndex = index;
+      const t = lineTimings[index].start;
+      audio.currentTime = t;
+      lastKnownTime = t;
       renderSegments();
+      scrollCurrentIntoView();
+      if (autoplay) playCurrentMode();
     }
 
-    function speakUtterancePromise(text, lang, passIndex=1) {
-      return new Promise((resolve) => {
-        if (isCancelled) return resolve();
-        const utter = buildUtterance(text, lang);
-        if (!utter) return resolve();
-        utter.onstart = () => {
-          let msg = `Đang đọc đoạn ${currentIndex + 1}/${segments.length} — ${langLabel(lang)}`;
-          if (comboSelect.value === 'ko2' && lang === 'ko') {
-            msg += ` (lượt ${passIndex}/2)`;
-          }
-          setStatus(msg);
-          renderSegments();
-        };
-        utter.onend = () => resolve();
-        utter.onerror = () => resolve();
-        speechSynthesis.speak(utter);
-      });
-    }
+    function playCurrentMode(){
+      clearShadowTimeout();
+      audio.pause();
+      audio.playbackRate = parseFloat(playbackRate.value);
 
-    async function speakFilteredChunks(chunks, onDone) {
-      isCancelled = false;
-      const filtered = expandChunksForCombo(chunks);
-
-      if (!filtered.length) {
-        setStatus('Đoạn này không có ngôn ngữ thuộc combo đã chọn.');
-        renderSegments();
-        if (onDone) onDone();
+      if (studyMode.value === 'ab_loop') {
+        audio.currentTime = parseFloat(loopStart.value || '0');
+        audio.play().catch(()=>{});
         return;
       }
 
-      for (let i = 0; i < filtered.length; i++) {
-        const item = filtered[i];
-        if (isCancelled) break;
-        const passIndex = comboSelect.value === 'ko2' ? ((i % 2) + 1) : 1;
-        await speakUtterancePromise(item.text, item.lang, passIndex);
-        if (isCancelled) break;
-        await wait(safeMode.value === 'on' ? parseInt(pauseMs.value, 10) : 50);
+      if (currentLineIndex < 0 && segments.length) currentLineIndex = 0;
+      if (currentLineIndex >= 0 && lineTimings[currentLineIndex]) {
+        audio.currentTime = lineTimings[currentLineIndex].start;
+      }
+      audio.play().catch(()=>{});
+      setStatus('Đang phát.');
+    }
+
+    function stopPlayback(resetToCurrent=true){
+      clearShadowTimeout();
+      audio.pause();
+      if (resetToCurrent && currentLineIndex >= 0 && lineTimings[currentLineIndex]) {
+        audio.currentTime = lineTimings[currentLineIndex].start;
+      } else {
+        audio.currentTime = 0;
+      }
+      setStatus('Đã dừng.');
+    }
+
+    function advanceLine(delta, autoplay=true){
+      if (!segments.length) return;
+      if (currentLineIndex < 0) currentLineIndex = 0;
+      currentLineIndex = Math.max(0, Math.min(segments.length - 1, currentLineIndex + delta));
+      jumpToLine(currentLineIndex, autoplay);
+    }
+
+    audioFile.addEventListener('change', () => {
+      const file = audioFile.files?.[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      audio.src = url;
+      audioInfo.textContent = file.name;
+      audioMeta.textContent = `Đã nạp file: ${file.name}`;
+      setStatus('MP3 đã sẵn sàng.');
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      audioMeta.textContent = `Thời lượng: ${audio.duration.toFixed(1)} giây`;
+      recomputeLineTimings();
+      renderSegments();
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      lastKnownTime = audio.currentTime;
+
+      if (segments.length && lineTimings.length) {
+        for (let i = 0; i < lineTimings.length; i++) {
+          const t = lineTimings[i];
+          if (audio.currentTime >= t.start && audio.currentTime < t.end) {
+            if (currentLineIndex !== i) {
+              currentLineIndex = i;
+              renderSegments();
+              scrollCurrentIntoView();
+            }
+            break;
+          }
+        }
       }
 
-      if (!isCancelled && onDone) onDone();
-    }
-
-    function speakSegment(index) {
-      if (!segments[index]) return;
-      currentIndex = index;
-      stopSpeaking();
-      const chunks = chunkText(segments[index]);
-      setTimeout(() => {
-        isCancelled = false;
-        speakFilteredChunks(chunks);
-      }, 120);
-    }
-
-    function readAllFrom(index = 0) {
-      if (!segments.length) return;
-      currentIndex = index;
-      stopSpeaking();
-
-      const readOne = async (idx) => {
-        if (idx >= segments.length || isCancelled) {
-          if (!isCancelled) setStatus('Đã đọc xong.');
-          renderSegments();
-          return;
+      if (studyMode.value === 'ab_loop') {
+        const a = parseFloat(loopStart.value || '0');
+        const b = parseFloat(loopEnd.value || '0');
+        if (b > a && audio.currentTime >= b) {
+          audio.currentTime = a;
+          audio.play().catch(()=>{});
         }
-        currentIndex = idx;
-        const chunks = chunkText(segments[idx]);
-        await wait(120);
-        if (isCancelled) return;
-        await speakFilteredChunks(chunks, () => readOne(idx + 1));
-      };
+        return;
+      }
 
-      setTimeout(() => {
-        isCancelled = false;
-        readOne(index);
-      }, 120);
-    }
+      if (currentLineIndex >= 0 && lineTimings[currentLineIndex]) {
+        const end = lineTimings[currentLineIndex].end;
+        if (audio.currentTime >= end - 0.02) {
+          const mode = studyMode.value;
 
-    function refreshVoiceUI() {
-      setupVoices();
-      renderSegments();
-      saveSettings();
-    }
+          if (mode === 'normal') {
+            if (currentLineIndex < segments.length - 1) {
+              currentLineIndex += 1;
+              audio.currentTime = lineTimings[currentLineIndex].start;
+              renderSegments();
+            } else {
+              audio.pause();
+            }
+          } else if (mode === 'line_repeat_2' || mode === 'line_repeat_3') {
+            const repeatTarget = mode === 'line_repeat_2' ? 2 : 3;
+            const repeated = Number(audio.dataset.repeatedCount || '1');
+            if (repeated < repeatTarget) {
+              audio.dataset.repeatedCount = String(repeated + 1);
+              audio.currentTime = lineTimings[currentLineIndex].start;
+            } else {
+              audio.dataset.repeatedCount = '1';
+              if (currentLineIndex < segments.length - 1) {
+                currentLineIndex += 1;
+                audio.currentTime = lineTimings[currentLineIndex].start;
+                renderSegments();
+              } else {
+                audio.pause();
+              }
+            }
+          } else if (mode === 'shadow_pause') {
+            audio.pause();
+            const repeated = Number(audio.dataset.shadowRepeated || '0');
+            if (repeated === 0) {
+              audio.dataset.shadowRepeated = '1';
+              shadowTimeout = setTimeout(() => {
+                if (!lineTimings[currentLineIndex]) return;
+                audio.currentTime = lineTimings[currentLineIndex].start;
+                audio.play().catch(()=>{});
+              }, parseInt(shadowPause.value, 10));
+            } else {
+              audio.dataset.shadowRepeated = '0';
+              if (currentLineIndex < segments.length - 1) {
+                currentLineIndex += 1;
+                audio.currentTime = lineTimings[currentLineIndex].start;
+                renderSegments();
+                audio.play().catch(()=>{});
+              }
+            }
+          }
+        }
+      }
+    });
 
     splitBtn.addEventListener('click', () => {
+      splitTranscript();
       saveSettings();
-      segments = splitText(inputText.value, segmentMode.value);
-      currentIndex = segments.length ? 0 : -1;
-      renderSegments();
-      setStatus(segments.length ? `Đã tách ${segments.length} đoạn.` : 'Không có nội dung để tách.');
     });
 
-    readAllBtn.addEventListener('click', () => {
-      if (!segments.length) {
-        segments = splitText(inputText.value, segmentMode.value);
-        renderSegments();
-      }
-      if (!segments.length) return setStatus('Bạn chưa có nội dung để đọc.');
-      readAllFrom(0);
+    playBtn.addEventListener('click', () => {
+      if (!audio.src) return setStatus('Bạn chưa nạp file MP3.');
+      playCurrentMode();
     });
 
-    repeatBtn.addEventListener('click', () => {
-      if (currentIndex < 0 && segments.length) currentIndex = 0;
-      if (currentIndex < 0) return setStatus('Chưa có đoạn để đọc lại.');
-      speakSegment(currentIndex);
+    pauseBtn.addEventListener('click', () => {
+      clearShadowTimeout();
+      audio.pause();
+      setStatus('Đã tạm dừng.');
     });
 
-    stopBtn.addEventListener('click', stopSpeaking);
-
-    nextBtn.addEventListener('click', () => {
-      if (!segments.length) return setStatus('Chưa có đoạn nào.');
-      const next = currentIndex + 1 < segments.length ? currentIndex + 1 : 0;
-      speakSegment(next);
+    readFromHereBtn.addEventListener('click', () => {
+      if (!audio.src) return setStatus('Bạn chưa nạp file MP3.');
+      if (currentLineIndex < 0 && segments.length) currentLineIndex = 0;
+      jumpToLine(currentLineIndex, true);
     });
+
+    prevLineBtn.addEventListener('click', () => advanceLine(-1, true));
+    nextLineBtn.addEventListener('click', () => advanceLine(1, true));
+
+    stopBtn.addEventListener('click', () => stopPlayback(true));
 
     clearBtn.addEventListener('click', () => {
-      stopSpeaking();
-      inputText.value = '';
+      clearShadowTimeout();
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+      audioFile.value = '';
+      transcript.value = '';
       segments = [];
-      currentIndex = -1;
+      lineTimings = [];
+      currentLineIndex = -1;
+      audioInfo.textContent = 'Chưa có file';
+      audioMeta.textContent = 'Nạp file mp3 để bắt đầu.';
       renderSegments();
       saveSettings();
       setStatus('Đã xóa nội dung.');
     });
 
-    [segmentMode, safeMode, voiceA, voiceB].forEach(el => el.addEventListener('change', saveSettings));
-    [rateA, rateB, pauseMs].forEach(el => {
+    [studyMode, fontSize, playbackRate, shadowPause, loopStart, loopEnd, autoScrollToggle].forEach(el => {
       el.addEventListener('input', () => { updateLabels(); saveSettings(); });
       el.addEventListener('change', () => { updateLabels(); saveSettings(); });
     });
 
-    comboSelect.addEventListener('change', refreshVoiceUI);
-    inputText.addEventListener('input', saveSettings);
+    transcript.addEventListener('input', saveSettings);
 
-    if ('speechSynthesis' in window) {
-      loadSettings();
-      voices = speechSynthesis.getVoices().slice();
-      setupVoices();
-      renderSegments();
-      setStatus('Sẵn sàng. Trên iPhone nên để Safe mode = Bật.');
-      speechSynthesis.onvoiceschanged = () => {
-        voices = speechSynthesis.getVoices().slice();
-        setupVoices();
-        renderSegments();
-      };
-    } else {
-      setStatus('Trình duyệt này chưa hỗ trợ đọc văn bản.');
-    }
-
+    loadSettings();
+    updateLabels();
+    if (transcript.value.trim()) splitTranscript();
+    else renderSegments();
+    setStatus('Sẵn sàng. Nạp mp3 rồi bấm Phát.');
   </script>
 </body>
 </html>
